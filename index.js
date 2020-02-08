@@ -24,6 +24,7 @@ let persons = [
 ]
 
 const app = express()
+app.use(express.json())
 
 app.get("/", (req, res) => {
     res.send("<h1>Hello</h1>")
@@ -64,16 +65,34 @@ app.delete("/api/persons/:id", (req, res) => {
     }
 })
 
-app.post("/api/persons/:id", (req, res) => {
+app.post("/api/persons", (req, res) => {
     const id = Math.floor(Math.random() * 2048)
-    const name = req.params.name
-    const number = req.params.name
+    const body = req.body
+    const name = body.name
+    if (!name) {
+        return res.status(400).json({
+            error: "missing name",
+        })
+    }
+    const existing = persons.find(p => p.name === name)
+    if (existing) {
+        return res.status(400).json({
+            error: `person with name ${name} already exists in the database`
+        })
+    }
+    const number = body.number
+    if (!number) {
+        return res.status(400).json({
+            error: "missing number",
+        })
+    }
     const person = {
         id,
         name,
         number,
     }
     persons = persons.concat(person)
+    res.json(person)
 })
 
 app.listen(3001, () => { })
