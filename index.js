@@ -1,6 +1,6 @@
 const express = require("express")
 
-const persons = [
+let persons = [
     {
         name: "Arto Hellas",
         number: "040-123456",
@@ -43,6 +43,19 @@ app.get("/api/persons/:id", (req, res) => {
     const id = Number(req.params.id)
     const person = persons.find(p => p.id === id)
     if (person) {
+        console.log("found", person)
+        res.send(person)
+    } else {
+        console.error("no person found with id", id)
+        res.status(404).end()
+    }
+})
+
+app.delete("/api/persons/:id", (req, res) => {
+    const id = Number(req.params.id)
+    const person = persons.find(p => p.id === id)
+    if (person) {
+        persons = persons.filter(p => p.id !== id)
         console.log("found", person)
         res.send(person)
     } else {
