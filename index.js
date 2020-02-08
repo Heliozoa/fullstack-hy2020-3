@@ -29,6 +29,12 @@ app.get("/", (req, res) => {
     res.send("<h1>Hello</h1>")
 })
 
+app.get("/info", (req, res) => {
+    const count = persons.length
+    const date = Date()
+    res.send(`Phonebook has info for ${count} people<br><br>${date}`)
+})
+
 app.get("/api/persons", (req, res) => {
     res.send(persons)
 })
