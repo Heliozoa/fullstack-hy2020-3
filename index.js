@@ -25,7 +25,24 @@ let persons = [
 ]
 
 const app = express()
-app.use(morgan("tiny"))
+
+const logger = morgan(function (tokens, req, res) {
+    let arr = [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, "content-length"), "-",
+        tokens["response-time"](req, res), "ms"
+    ]
+    if (req.method === "POST") {
+        const data = req.body
+        arr.push(JSON.stringify(data))
+    }
+    console.log(arr)
+    return arr.join(" ")
+})
+
+app.use(logger)
 app.use(express.json())
 
 app.get("/", (req, res) => {
