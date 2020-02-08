@@ -64,6 +64,16 @@ app.delete("/api/persons/:id", (req, res) => {
     }
 })
 
-
+app.post("/api/persons/:id", (req, res) => {
+    const id = Math.floor(Math.random() * 2048)
+    const name = req.params.name
+    const number = req.params.name
+    const person = {
+        id,
+        name,
+        number,
+    }
+    persons = persons.concat(person)
+})
 
 app.listen(3001, () => { })
