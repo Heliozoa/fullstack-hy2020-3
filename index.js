@@ -1,29 +1,19 @@
+require("dotenv").config()
 const express = require("express")
 const morgan = require("morgan")
 const cors = require("cors")
+const Person = require("./models/person")
+const mongoose = require('mongoose')
 
-let persons = [
-    {
-        name: "Arto Hellas",
-        number: "040-123456",
-        id: 1,
-    },
-    {
-        name: "Ada Lovelace",
-        number: "39-44-5323523",
-        id: 2,
-    },
-    {
-        name: "Dan Abramov",
-        number: "12-43-234345",
-        id: 3,
-    },
-    {
-        name: "Mary Poppendieck",
-        number: "39-23-6423122",
-        id: 4,
-    },
-]
+const url = process.env.MONGODB_URI
+mongoose.set('useFindAndModify', false)
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(res => {
+        console.log('connected to MongoDB')
+    })
+    .catch(e => {
+        console.log('error connecting to MongoDB:', e.message)
+    })
 
 const app = express()
 
@@ -53,13 +43,17 @@ app.get("/", (req, res) => {
 })
 
 app.get("/info", (req, res) => {
-    const count = persons.length
-    const date = Date()
-    res.send(`Phonebook has info for ${count} people<br><br>${date}`)
+    Person.find({}).then(persons => {
+        const count = persons.length
+        const date = Date()
+        res.send(`Phonebook has info for ${count} people<br><br>${date}`)
+    })
 })
 
 app.get("/api/persons", (req, res) => {
-    res.send(persons)
+    Person.find({}).then(persons => {
+        res.json(persons.map(p => p.toJSON()))
+    })
 })
 
 app.get("/api/persons/:id", (req, res) => {
@@ -117,5 +111,5 @@ app.post("/api/persons", (req, res) => {
     res.json(person)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => { })
