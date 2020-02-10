@@ -5,19 +5,11 @@ const cors = require("cors")
 const Person = require("./models/person")
 const mongoose = require('mongoose')
 
-const url = process.env.MONGODB_URI
-mongoose.set('useFindAndModify', false)
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(res => {
-        console.log('connected to MongoDB')
-    })
-    .catch(e => {
-        console.log('error connecting to MongoDB:', e.message)
-    })
-
 const app = express()
-
-const logger = morgan(function (tokens, req, res) {
+app.use(express.json())
+app.use(cors())
+app.use(express.static("build"))
+app.use(morgan(function (tokens, req, res) {
     let arr = [
         tokens.method(req, res),
         tokens.url(req, res),
@@ -29,34 +21,37 @@ const logger = morgan(function (tokens, req, res) {
         const data = req.body
         arr.push(JSON.stringify(data))
     }
-    console.log(arr)
     return arr.join(" ")
-})
+}))
 
-app.use(logger)
-app.use(express.json())
-app.use(cors())
-app.use(express.static("build"))
+const url = process.env.MONGODB_URI
+mongoose.set('useFindAndModify', false)
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(res => {
+        console.log('connected to MongoDB')
+    })
+    .catch(e => console.error('error connecting to MongoDB:', e.message))
 
-app.get("/", (req, res) => {
+
+app.get("/", (req, res, next) => {
     res.send("<h1>Hello</h1>")
 })
 
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
     Person.find({}).then(persons => {
         const count = persons.length
         const date = Date()
         res.send(`Phonebook has info for ${count} people<br><br>${date}`)
-    })
+    }).catch(e => next(e))
 })
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/persons", (req, res, next) => {
     Person.find({}).then(persons => {
         res.json(persons.map(p => p.toJSON()))
-    })
+    }).catch(e => next(e))
 })
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
     const id = Number(req.params.id)
     const person = persons.find(p => p.id === id)
     if (person) {
@@ -68,41 +63,40 @@ app.get("/api/persons/:id", (req, res) => {
     }
 })
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
     const id = String(req.params.id)
     Person.findOne({ _id: id })
         .then(p => {
-            console.log(p)
             p.delete()
             res.send(p)
         })
-        .catch(e => {
-            console.error("no person found with id", id, e)
-
-            res.status(404).end()
-        })
+        .catch(e => next(e))
 })
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
     const body = req.body
     const name = body.name
     if (!name) {
-        return res.status(400).json({
-            error: "missing name",
-        })
+        next({ message: "missing name", })
+        return
     }
     const number = body.number
     if (!number) {
-        return res.status(400).json({
-            error: "missing number",
-        })
+        next({ message: "missing number", })
+        return
     }
     const person = new Person({
         name,
         number,
     })
-    person.save().then(p => res.json(p.toJSON()))
+    person.save().then(p => res.json(p.toJSON())).catch(e => next(e))
 })
+
+const errorHandler = (err, req, res, next) => {
+    console.error("error:", err.message)
+    return res.status(500).send({ error: err.message })
+}
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => { })
