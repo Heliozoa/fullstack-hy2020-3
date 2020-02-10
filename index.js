@@ -82,18 +82,11 @@ app.delete("/api/persons/:id", (req, res) => {
 })
 
 app.post("/api/persons", (req, res) => {
-    const id = Math.floor(Math.random() * 2048)
     const body = req.body
     const name = body.name
     if (!name) {
         return res.status(400).json({
             error: "missing name",
-        })
-    }
-    const existing = persons.find(p => p.name === name)
-    if (existing) {
-        return res.status(400).json({
-            error: `person with name ${name} already exists in the database`
         })
     }
     const number = body.number
@@ -102,13 +95,11 @@ app.post("/api/persons", (req, res) => {
             error: "missing number",
         })
     }
-    const person = {
-        id,
+    const person = new Person({
         name,
         number,
-    }
-    persons = persons.concat(person)
-    res.json(person)
+    })
+    person.save().then(p => res.json(p.toJSON()))
 })
 
 const PORT = process.env.PORT
