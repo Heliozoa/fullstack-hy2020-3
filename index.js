@@ -69,16 +69,18 @@ app.get("/api/persons/:id", (req, res) => {
 })
 
 app.delete("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-    if (person) {
-        persons = persons.filter(p => p.id !== id)
-        console.log("found", person)
-        res.send(person)
-    } else {
-        console.error("no person found with id", id)
-        res.status(404).end()
-    }
+    const id = String(req.params.id)
+    Person.findOne({ _id: id })
+        .then(p => {
+            console.log(p)
+            p.delete()
+            res.send(p)
+        })
+        .catch(e => {
+            console.error("no person found with id", id, e)
+
+            res.status(404).end()
+        })
 })
 
 app.post("/api/persons", (req, res) => {
