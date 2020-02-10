@@ -26,6 +26,7 @@ app.use(morgan(function (tokens, req, res) {
 
 const url = process.env.MONGODB_URI
 mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true);
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(res => {
         console.log('connected to MongoDB')
@@ -100,7 +101,7 @@ app.put("/api/persons/:id", (req, res, next) => {
 })
 
 const errorHandler = (err, req, res, next) => {
-    console.error("error:", err.message)
+    console.error(err.name, ":", err.message)
     return res.status(500).send({ error: err.message })
 }
 app.use(errorHandler)
