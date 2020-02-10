@@ -85,7 +85,8 @@ app.post("/api/persons", (req, res, next) => {
 app.put("/api/persons/:id", (req, res, next) => {
     const id = String(req.params.id)
     const person = req.body
-    Person.findByIdAndUpdate(id, person, { runValidators: true })
+    console.log("updating", person, id)
+    Person.findOneAndUpdate({ _id: id }, person, { runValidators: true, context: 'query' })
         .then(old => {
             console.log("updated", old, "to", person)
             res.json(person)
