@@ -92,6 +92,16 @@ app.post("/api/persons", (req, res, next) => {
     person.save().then(p => res.json(p.toJSON())).catch(e => next(e))
 })
 
+app.put("/api/persons/:id", (req, res, next) => {
+    const id = String(req.params.id)
+    const person = req.body
+    Person.findByIdAndUpdate(id, person)
+        .then(old => {
+            console.log("updated", old, "to", person)
+            res.json(person)
+        }).catch(e => next(e))
+})
+
 const errorHandler = (err, req, res, next) => {
     console.error("error:", err.message)
     return res.status(500).send({ error: err.message })
