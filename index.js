@@ -46,6 +46,7 @@ const logger = morgan(function (tokens, req, res) {
 app.use(logger)
 app.use(express.json())
 app.use(cors())
+app.use(express.static("build"))
 
 app.get("/", (req, res) => {
     res.send("<h1>Hello</h1>")
@@ -116,4 +117,5 @@ app.post("/api/persons", (req, res) => {
     res.json(person)
 })
 
-app.listen(3001, () => { })
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => { })
