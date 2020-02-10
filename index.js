@@ -74,15 +74,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
 app.post("/api/persons", (req, res, next) => {
     const body = req.body
     const name = body.name
-    if (!name) {
-        next({ message: "missing name", })
-        return
-    }
     const number = body.number
-    if (!number) {
-        next({ message: "missing number", })
-        return
-    }
     const person = new Person({
         name,
         number,
@@ -93,7 +85,7 @@ app.post("/api/persons", (req, res, next) => {
 app.put("/api/persons/:id", (req, res, next) => {
     const id = String(req.params.id)
     const person = req.body
-    Person.findByIdAndUpdate(id, person)
+    Person.findByIdAndUpdate(id, person, { runValidators: true })
         .then(old => {
             console.log("updated", old, "to", person)
             res.json(person)

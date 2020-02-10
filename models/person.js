@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator');
 
 const schema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
-    number: { type: String, required: true, unique: false },
+    name: { type: String, required: true, minlength: 3, unique: true },
+    number: { type: String, required: true, minlength: 8, unique: false },
 })
 
 schema.set('toJSON', {
