@@ -52,15 +52,12 @@ app.get("/api/persons", (req, res, next) => {
 })
 
 app.get("/api/persons/:id", (req, res, next) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-    if (person) {
-        console.log("found", person)
-        res.send(person)
-    } else {
-        console.error("no person found with id", id)
-        res.status(404).end()
-    }
+    const id = String(req.params.id)
+    Person.find({ _id: id })
+        .then(person => {
+            console.log("found", person)
+            res.send(person)
+        }).catch(e => next(e))
 })
 
 app.delete("/api/persons/:id", (req, res, next) => {
